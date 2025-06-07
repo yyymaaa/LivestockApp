@@ -1,11 +1,11 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native';
-import LoginScreen from '../screens/LoginScreen';
+import Admin from '../screens/admin';
 
 export default function App() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <LoginScreen />
+      <Admin />
     </SafeAreaView>
   );
 }
