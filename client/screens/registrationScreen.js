@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-const registrationScreen = () => {
+const RegistrationScreen = () => {
   return (
     <View>
       <Text>registrationScreen</Text>
@@ -9,6 +9,6 @@ const registrationScreen = () => {
   )
 }
 
-export default registrationScreen
+export default RegistrationScreen
 
 const styles = StyleSheet.create({})
