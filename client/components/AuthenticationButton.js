@@ -3,7 +3,7 @@ import React from 'react';
 
 const AuthenticationButton = ({ label, onPress, backgroundColor = '#29AB87'}) => {
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
+    <TouchableOpacity style={[styles.button, { backgroundColor }]} onPress={onPress}>
       <Text style={styles.text}>{label}</Text>
     </TouchableOpacity>
   );
@@ -17,6 +17,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
+    borderWidth: 1, 
+    borderColor: '#29AB87', 
   },
   text: {
     color: '#FFFFFF',
