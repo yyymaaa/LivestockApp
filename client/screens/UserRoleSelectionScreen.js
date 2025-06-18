@@ -42,6 +42,7 @@ const UserRoleSelectionScreen = () => {
               key={idx}
               onPress={opt.action}
               style={styles.card}
+              activeOpacity={0.7}
             >
               <Text style={styles.cardTitle}>{opt.title}</Text>
               <Text style={styles.cardSubtitle}>{opt.subtitle}</Text>
@@ -121,7 +122,7 @@ const styles = StyleSheet.create({
     color: '#888',
   },
   signInButton: {
-    backgroundColor: '#3366FF',
+    backgroundColor: '#29AB87',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 24,
