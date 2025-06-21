@@ -13,15 +13,15 @@ import AuthenticationButton from '../../components/AuthenticationButton';
 import AuthPasswordTextField from '../../components/AuthPasswordTextField';
 import InputField from '../../components/InputField';
 
-import { useRouter } from 'expo-router'; // ✅ ADDED for navigation
-import AsyncStorage from '@react-native-async-storage/async-storage'; // ✅ Optional: to store user
+import { useRouter } from 'expo-router'; //for navigation
+import AsyncStorage from '@react-native-async-storage/async-storage'; //to store user (this is optional
 
 const LoginScreen = () => {
   const [phoneOrEmail, setPhoneOrEmail] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter(); // ✅ ADDED
+  const router = useRouter(); 
 
-  // ✅ ADDED: Login function
+ 
   const handleLogin = async () => {
     try {
       const response = await fetch('http://192.168.56.1:5000/api/auth/login', {
@@ -41,14 +41,14 @@ const LoginScreen = () => {
 
       const user = data.user;
 
-      // ✅ OPTIONAL: Store user in local storage
+      //Store user in local storag, this  too is optional
       await AsyncStorage.setItem('user', JSON.stringify(user));
 
-      // ✅ Redirect based on role/group_id
+      //Redirecting based on role
       if (user.role === 'Farmer' || user.group_id === 3) {
         router.replace('/(tabs)/farmer');
       } else {
-        router.replace('/(tabs)/serviceProvider'); // Change this path to your client tab if available
+        router.replace('/(tabs)/serviceProvider'); 
       }
 
     } catch (error) {
@@ -84,10 +84,10 @@ const LoginScreen = () => {
           <Text style={StyleSheet.forgotPasswordText}>Forgot Password?</Text>
         </TouchableOpacity>
 
-        {/* ✅ CHANGED: Hook up the login function here */}
+        {/*login function goes here */}
         <AuthenticationButton
           label="Log In"
-          onPress={handleLogin} // ✅ CALL handleLogin
+          onPress={handleLogin} // calling handleLogin
         />
 
         <View style={StyleSheet.orContainer}>
