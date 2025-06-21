@@ -1,9 +1,5 @@
-import axios from 'axios';
-
+// client/api/api.js
 const Api = axios.create({
-  baseURL: 'http://localhost:5000/api', // Change to IP if using physical phone
+  baseURL: 'http://localhost:5000/api',
   responseType: 'json',
-  withCredentials: true,
 });
-
-export default Api;
