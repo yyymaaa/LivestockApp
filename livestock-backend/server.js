@@ -7,7 +7,7 @@ const farmerServices = require('./routes/farmer/servicelistings');
 const myListings = require('./routes/farmer/mylistings');
 const searchListings = require('./routes/farmer/searchlistings');
 
-// If she already has app setup...
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
