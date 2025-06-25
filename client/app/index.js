@@ -1,4 +1,13 @@
-import React, { useEffect, useState } from 'react';
+//client/app/index.js
+import { Redirect } from 'expo-router';
+
+export default function AppIndex() {
+  //return <Redirect href="/(tabs)/farmer" />;
+
+  return <Redirect href="/(tabs)/serviceprovider" />;
+}
+
+/*import React, { useEffect, useState } from 'react';
 import { Redirect, SplashScreen } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -38,3 +47,4 @@ export default function AppIndex() {
 
   return <Redirect href={redirectPath} />;
 }
+*/

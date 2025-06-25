@@ -1,3 +1,4 @@
+// client/app/(tabs)/farmer/mylistings.js
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -16,13 +17,12 @@ const MyListings = () => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Mock farmer ID (replace with actual user ID from auth context)
-  const farmerId = 1;
+  const farmerId = 3; // Temporary test farmer_id
 
   useEffect(() => {
     const fetchListings = async () => {
       try {
-        const res = await fetch(`http://192.168.56.1:5000/api/farmer/mylistings/${farmerId}`);
+        const res = await fetch(`http://192.168.0.100:5000/api/farmer/mylistings/${farmerId}`);
         const data = await res.json();
         setListings(data);
       } catch (error) {
@@ -40,7 +40,11 @@ const MyListings = () => {
   };
 
   const handlePressCard = (listing) => {
-    router.push({ pathname: '/farmer/listingdetails', params: { id: listing.offering_id } });
+    router.push({ pathname: '/farmer/listingdetails', params: { id: listing.listing_id || listing.offering_id } });
+  };
+
+  const handleGoBack = () => {
+    router.back();
   };
 
   if (loading) {
@@ -54,11 +58,13 @@ const MyListings = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={handleGoBack} style={styles.iconButton}>
           <Ionicons name="arrow-back" size={24} color="green" />
         </TouchableOpacity>
+
         <Text style={styles.title}>My Listings</Text>
-        <TouchableOpacity onPress={handleAdd}>
+
+        <TouchableOpacity onPress={handleAdd} style={styles.iconButton}>
           <Ionicons name="add" size={28} color="green" />
         </TouchableOpacity>
       </View>
@@ -66,7 +72,9 @@ const MyListings = () => {
       <FlatList
         data={listings}
         numColumns={3}
-        keyExtractor={(item) => item.offering_id.toString()}
+        keyExtractor={(item) =>
+          (item.listing_id || item.offering_id || Math.random()).toString()
+        }
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -98,6 +106,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     marginBottom: 20,
+  },
+  iconButton: {
+    padding: 5,
   },
   title: {
     fontSize: 20,

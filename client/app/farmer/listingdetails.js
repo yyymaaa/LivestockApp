@@ -1,5 +1,4 @@
 //client/app/farmer/listingdetails.js
-
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -21,9 +20,18 @@ const ListingDetails = () => {
   useEffect(() => {
     const fetchListing = async () => {
       try {
-        const response = await fetch(`http://192.168.56.1:5000/api/farmer/mylistings/${id}`);
+        // Get all listings for user_id = 3
+        const response = await fetch(`http://192.168.0.100:5000/api/farmer/mylistings/3`);
         const data = await response.json();
-        setListing(data);
+
+        // Find the one with the matching offering_id or listing_id
+        const found = data.find(
+          (item) =>
+            item.offering_id?.toString() === id?.toString() ||
+            item.listing_id?.toString() === id?.toString()
+        );
+
+        setListing(found);
       } catch (error) {
         console.error('Error fetching listing:', error);
       }
@@ -38,6 +46,8 @@ const ListingDetails = () => {
       params: {
         mode: 'edit',
         listing: JSON.stringify(listing),
+        user_id: listing.user_id,
+        id: listing.offering_id || listing.listing_id,
       },
     });
   };
@@ -53,8 +63,8 @@ const ListingDetails = () => {
         style: 'destructive',
         onPress: async () => {
           try {
-            await fetch(`http://192.168.56.1:5000/api/farmer/mylistings/${id}`, {
-            method: 'DELETE',
+            await fetch(`http://192.168.0.100:5000/api/farmer/mylistings/${listing.offering_id || listing.listing_id}`, {
+              method: 'DELETE',
             });
             router.back();
           } catch (err) {
@@ -63,6 +73,10 @@ const ListingDetails = () => {
         },
       },
     ]);
+  };
+
+  const handleGoBack = () => {
+    router.back();
   };
 
   if (!listing) {
@@ -75,8 +89,14 @@ const ListingDetails = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
+        <Ionicons name="arrow-back" size={24} color="green" />
+        <Text style={styles.backText}>Back</Text>
+      </TouchableOpacity>
+
       <Image
-        source={{ uri: listing.image_url || 'https://via.placeholder.com/300' }}
+        source={{ uri: listing.media?.[0]?.url || 'https://via.placeholder.com/300' }}
         style={styles.image}
       />
       <Text style={styles.title}>{listing.title}</Text>
@@ -103,6 +123,16 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: '#fff',
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  backText: {
+    marginLeft: 5,
+    color: 'green',
+    fontWeight: 'bold',
   },
   image: {
     height: 200,

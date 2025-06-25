@@ -1,5 +1,13 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, Image, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  Image,
+  StyleSheet,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -9,26 +17,33 @@ export default function SearchScreen() {
   const [searchSubmitted, setSearchSubmitted] = useState(false);
   const [recentSearches, setRecentSearches] = useState(['tractor', 'pesticide', 'vet service']);
   const [results, setResults] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSearch = async () => {
-    if (!query.trim()) return;
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) return;
 
     try {
-      const response = await fetch(`http://192.168.56.1:5000/api/farmer/searchlistings?query=${encodeURIComponent(query)}`);
+      setErrorMessage('');
+      const response = await fetch(
+        `http://192.168.0.100:5000/api/farmer/searchlistings?query=${encodeURIComponent(trimmedQuery)}`
+      );
+
+      if (!response.ok) throw new Error('Server error');
 
       const data = await response.json();
-      console.log('Search results:', data);  // Debugging
       setResults(data);
-
-      // Add to recent searches if not already there
-      setRecentSearches(prev => {
-        const updated = [query, ...prev.filter(q => q !== query)];
-        return updated.slice(0, 5); // Keep only last 5 searches
-      });
-      
       setSearchSubmitted(true);
+
+      // Update recent searches without duplicates
+      setRecentSearches((prev) => {
+        const unique = [trimmedQuery, ...prev.filter((q) => q !== trimmedQuery)];
+        return unique.slice(0, 5);
+      });
     } catch (error) {
       console.error('Search fetch error:', error);
+      setErrorMessage('Could not complete search. Check connection or try again.');
+      setResults([]);
     }
   };
 
@@ -49,11 +64,12 @@ export default function SearchScreen() {
           onSubmitEditing={handleSearch}
         />
 
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={() => {
             setQuery('');
             setSearchSubmitted(false);
             setResults([]);
+            setErrorMessage('');
           }}
           style={styles.cancelButton}
         >
@@ -65,41 +81,45 @@ export default function SearchScreen() {
       {searchSubmitted && query ? (
         <View style={styles.resultsContainer}>
           <Text style={styles.sectionTitle}>Search Results</Text>
-          
-          {results.length > 0 ? (
+
+          {errorMessage ? (
+            <View style={styles.noResults}>
+              <Ionicons name="warning-outline" size={50} color="#cc0000" />
+              <Text style={styles.noResultsText}>{errorMessage}</Text>
+            </View>
+          ) : results.length > 0 ? (
             <FlatList
               data={results}
               keyExtractor={(item) => item.offering_id.toString()}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.resultCard}
-                  onPress={() => router.push({
-                    pathname: '/farmer/listingdetails',
-                    params: { id: item.offering_id },
-                  })}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/farmer/listingdetails',
+                      params: { id: item.offering_id },
+                    })
+                  }
                 >
                   {/* Listing image */}
                   {item.image_url ? (
-                    <Image 
-                      source={{ uri: item.image_url }}
-                      style={styles.resultImage}
-                    />
+                    <Image source={{ uri: item.image_url }} style={styles.resultImage} />
                   ) : (
                     <View style={styles.imagePlaceholder}>
                       <Ionicons name="image-outline" size={30} color="#ccc" />
                     </View>
                   )}
-                  
+
                   {/* Listing details */}
                   <View style={styles.resultDetails}>
                     <Text style={styles.resultTitle} numberOfLines={1}>
                       {item.title}
                     </Text>
-                    
+
                     <Text style={styles.resultDescription} numberOfLines={2}>
                       {item.description}
                     </Text>
-                    
+
                     <View style={styles.metaContainer}>
                       <Text style={styles.resultPrice}>${item.price}</Text>
                       <Text style={styles.resultProvider}>{item.provider_name}</Text>
@@ -120,10 +140,10 @@ export default function SearchScreen() {
         // Recent searches section
         <View style={styles.recentContainer}>
           <Text style={styles.sectionTitle}>Recent Searches</Text>
-          
-          {recentSearches.map((item, index) => (
-            <TouchableOpacity 
-              key={index} 
+
+          {recentSearches.map((item) => (
+            <TouchableOpacity
+              key={`recent-${item}`}
               style={styles.recentItem}
               onPress={() => {
                 setQuery(item);
@@ -134,7 +154,7 @@ export default function SearchScreen() {
               <Text style={styles.recentText}>{item}</Text>
             </TouchableOpacity>
           ))}
-          
+
           {recentSearches.length === 0 && (
             <Text style={styles.noRecent}>No recent searches</Text>
           )}

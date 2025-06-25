@@ -1,4 +1,4 @@
-// client/app/farmer/listingform.js
+//client/app/farmer/listingform.js
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -23,13 +23,13 @@ const ListingForm = () => {
     title: '',
     image: '',
     description: '',
-    price: '',
-    quantity: '',
-    status: 'Available',
+    price_per_unit: '',
+    quantity_available: '',
+    status: 'available',
   });
 
   const listingId = params.id;
-  const farmerId = params.farmer_id;
+  const userId = params.user_id;
 
   useEffect(() => {
     if (isEdit && params.listing) {
@@ -75,7 +75,7 @@ const ListingForm = () => {
     });
 
     try {
-     const res = await fetch('http://192.168.56.1:5000/api/upload', {
+      const res = await fetch('http://192.168.0.100:5000/api/upload', {
         method: 'POST',
         body: formData,
         headers: {
@@ -97,14 +97,15 @@ const ListingForm = () => {
 
   const handleSubmit = async () => {
     const endpoint = isEdit
-  ? `http://192.168.56.1:5000/api/farmer/mylistings/${listingId}`
-  : 'http://192.168.56.1:5000/api/farmer/mylistings';
+      ? `http://192.168.0.100:5000/api/farmer/mylistings/${listingId}`
+      : 'http://192.168.0.100:5000/api/farmer/mylistings';
 
     const method = isEdit ? 'PUT' : 'POST';
 
     const payload = {
       ...form,
-      ...(isEdit ? {} : { farmer_id: farmerId }),
+      status: form.status.toLowerCase(),
+      ...(isEdit ? {} : { user_id: userId }),
     };
 
     try {
@@ -133,9 +134,9 @@ const ListingForm = () => {
       title: '',
       image: '',
       description: '',
-      price: '',
-      quantity: '',
-      status: 'Available',
+      price_per_unit: '',
+      quantity_available: '',
+      status: 'available',
     });
   };
 
@@ -159,16 +160,21 @@ const ListingForm = () => {
         )}
       </TouchableOpacity>
 
-      {['title', 'description', 'price', 'quantity'].map((field) => (
-        <View key={field} style={styles.inputContainer}>
+      {[
+        { key: 'title', placeholder: 'Title' },
+        { key: 'description', placeholder: 'Description' },
+        { key: 'price_per_unit', placeholder: 'Price per unit' },
+        { key: 'quantity_available', placeholder: 'Quantity available' },
+      ].map(({ key, placeholder }) => (
+        <View key={key} style={styles.inputContainer}>
           <TextInput
-            placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-            value={form[field]}
-            onChangeText={(text) => handleChange(field, text)}
+            placeholder={placeholder}
+            value={form[key]}
+            onChangeText={(text) => handleChange(key, text)}
             style={styles.input}
-            multiline={field === 'description'}
+            multiline={key === 'description'}
           />
-          <TouchableOpacity onPress={() => clearField(field)}>
+          <TouchableOpacity onPress={() => clearField(key)}>
             <Ionicons name="close" size={20} color="gray" />
           </TouchableOpacity>
         </View>
@@ -176,7 +182,7 @@ const ListingForm = () => {
 
       <View style={styles.inputContainer}>
         <TextInput
-          placeholder="Status (Available / Out of Stock / Limited)"
+          placeholder="Status (available / limited stock / unavailable)"
           value={form.status}
           onChangeText={(text) => handleChange('status', text)}
           style={styles.input}
