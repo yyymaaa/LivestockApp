@@ -17,7 +17,7 @@ const MyListings = () => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const serviceProviderId = 1; // TEMP: hardcoded, will use login later
+  const serviceProviderId = 1; // Temporary: hardcoded, will use login later
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -35,10 +35,10 @@ const MyListings = () => {
         if (Array.isArray(data)) {
           setListings(data);
         } else {
-          console.warn('⚠️ API did not return an array:', data);
+          console.warn('API did not return an array:', data);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch listings:', error);
+        console.error('Failed to fetch listings:', error);
       } finally {
         setLoading(false);
       }
@@ -89,7 +89,7 @@ const MyListings = () => {
           }
           contentContainerStyle={styles.list}
           renderItem={({ item }) => {
-            console.log('🧱 Rendering item:', item);
+            console.log('Rendering item:', item);
             return (
               <TouchableOpacity
                 style={styles.card}

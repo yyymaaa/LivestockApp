@@ -29,11 +29,11 @@ export default function Profile() {
       try {
         const response = await fetch(`http://192.168.0.100:5000/api/serviceprovider/profile/${serviceProviderId}`);
         const data = await response.json();
-        console.log('✅ Service Provider Profile fetched:', data);
+        console.log('Service Provider Profile fetched:', data);
         setUser(data.user);
         setEditedUser(data.user);
       } catch (err) {
-        console.error('❌ Fetch error:', err);
+        console.error('Fetch error:', err);
       }
     };
 
@@ -60,7 +60,7 @@ export default function Profile() {
       setIsEditing(false);
     } catch (err) {
       Alert.alert('Error', err.message);
-      console.error('❌ Save error:', err);
+      console.error('Save error:', err);
     }
   };
 
@@ -91,7 +91,7 @@ export default function Profile() {
         </View>
 
         <View style={styles.bioContainer}>
-          <Text style={styles.sectionTitle}>Bio</Text>
+        
           {isEditing ? (
             <>
               <TextInput

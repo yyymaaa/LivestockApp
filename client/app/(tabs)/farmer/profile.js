@@ -31,11 +31,11 @@ export default function Profile() {
       try {
         const response = await fetch(`http://192.168.0.100:5000/api/farmer/profile/${farmerId}`);
         const data = await response.json();
-        console.log('✅ Profile fetched:', data);
+        console.log('Profile fetched:', data);
         setUser(data.user);
         setEditedUser(data.user);
       } catch (err) {
-        console.error('❌ Profile fetch failed:', err);
+        console.error('Profile fetch failed:', err);
       }
     };
 
@@ -62,7 +62,7 @@ export default function Profile() {
       setIsEditing(false);
     } catch (err) {
       Alert.alert('Error', err.message);
-      console.error('❌ Save error:', err);
+      console.error('Save error:', err);
     }
   };
 
@@ -93,7 +93,6 @@ export default function Profile() {
         </View>
 
         <View style={styles.bioContainer}>
-          <Text style={styles.sectionTitle}>Bio</Text>
           {isEditing ? (
             <>
               <TextInput

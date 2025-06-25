@@ -1,3 +1,4 @@
+//client/app/(tabs)/serviceprovider/_layout.js
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -22,7 +23,7 @@ export default function ServiceProviderLayout() {
         headerShown: false,
       })}
     >
-      {/* ✅ This index screen will redirect but won’t appear in tab bar */}
+      {/* This index screen will redirect but won’t appear in tab bar */}
       <Tabs.Screen
         name="index"
         options={{
@@ -30,7 +31,7 @@ export default function ServiceProviderLayout() {
         }}
       />
 
-      {/* ✅ Visible, evenly spaced tabs */}
+      {/* Visible and evenly spaced tabs */}
       <Tabs.Screen name="mylistings" options={{ title: 'My Listings' }} />
       <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
     </Tabs>

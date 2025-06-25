@@ -48,7 +48,7 @@ router.get('/single/:listingId', async (req, res) => {
   }
 });
 
-// ✅ POST new listing
+//  POST new listing
 router.post('/', async (req, res) => {
   const { title, image, description, price_per_unit, quantity_available, status, user_id } = req.body;
 
@@ -69,7 +69,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// ✅ PUT update listing by ID
+// PUT update listing by ID
 router.put('/:listingId', async (req, res) => {
   const listingId = req.params.listingId;
   const { title, image, description, price_per_unit, quantity_available, status } = req.body;
@@ -92,7 +92,7 @@ router.put('/:listingId', async (req, res) => {
   }
 });
 
-// ✅ DELETE listing by ID
+// DELETE listing by ID
 router.delete('/:listingId', async (req, res) => {
   const listingId = req.params.listingId;
 

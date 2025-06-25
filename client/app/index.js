@@ -4,7 +4,9 @@ import { Redirect } from 'expo-router';
 export default function AppIndex() {
   //return <Redirect href="/(tabs)/farmer" />;
 
-  return <Redirect href="/(tabs)/serviceprovider" />;
+  //return <Redirect href="/(tabs)/serviceprovider" />;
+
+  return <Redirect href="/(tabs)/productbuyer" />;
 }
 
 /*import React, { useEffect, useState } from 'react';

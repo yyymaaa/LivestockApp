@@ -100,7 +100,6 @@ const ListingDetails = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Back Button */}
       <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
         <Ionicons name="arrow-back" size={24} color="green" />
         <Text style={styles.backText}>Back</Text>

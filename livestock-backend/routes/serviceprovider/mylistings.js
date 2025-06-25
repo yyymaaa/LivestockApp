@@ -7,7 +7,7 @@ const db = require('../../config/db');
 router.get('/:user_id', async (req, res) => {
   const userId = req.params.user_id;
 
-  console.log(`📥 Incoming request for listings of service provider user_id = ${userId}`);
+  console.log(` Incoming request for listings of service provider user_id = ${userId}`);
 
   try {
     const [rows] = await db.query(`
@@ -54,10 +54,10 @@ router.get('/:user_id', async (req, res) => {
 
     const listings = Object.values(listingsMap);
 
-    console.log(`✅ Sending ${listings.length} listing(s) for user_id = ${userId}`);
+    console.log(`Sending ${listings.length} listing(s) for user_id = ${userId}`);
     res.json(listings);
   } catch (err) {
-    console.error('❌ Error fetching service listings:', err);
+    console.error(' Error fetching service listings:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });

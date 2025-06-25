@@ -11,7 +11,7 @@ export default function FarmerHome() {
 
   const fetchListings = async () => {
     try {
-      console.log('🔄 Fetching listings from backend...');
+      console.log(' Fetching listings from backend...');
       const response = await fetch('http://192.168.0.105:5000/api/farmer/services', {
         headers: {
           'Accept': 'application/json',
@@ -19,19 +19,19 @@ export default function FarmerHome() {
         }
       });
 
-      console.log(`📡 Response status: ${response.status}`);
+      console.log(` Response status: ${response.status}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('📊 Received data:', data);
+      console.log(' Received data:', data);
       
       setListings(data);
       setError(null);
     } catch (err) {
-      console.error('❌ Fetch error:', err);
+      console.error(' Fetch error:', err);
       setError(err.message);
       Alert.alert('Error', 'Failed to load listings. Please try again later.');
     } finally {
