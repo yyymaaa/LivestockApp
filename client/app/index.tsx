@@ -1,14 +1,14 @@
 import React from 'react';
-import { SafeAreaView } from 'react-native';
-import Admin from '../screens/admin';
+import AppNavigator from '../navigation/AppNavigator';
+import { BASE_URL } from '../config';
+import { AuthProvider } from '../contexts/authenticationContext'; 
 
 export default function App() {
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <Admin />
-    </SafeAreaView>
+    <AuthProvider>
+      <AppNavigator />
+    </AuthProvider>
   );
 }
-
 
 
