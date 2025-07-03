@@ -4,8 +4,10 @@ import { View, Text, Image, StyleSheet } from 'react-native';
 export default function FarmerListingCard({ listing }) {
   return (
     <View style={styles.card}>
+      {/* Provider Name */}
       <Text style={styles.name}>{listing.provider_name}</Text>
 
+      {/* First image or placeholder */}
       {listing.media && listing.media.length > 0 ? (
         <Image source={{ uri: listing.media[0] }} style={styles.image} />
       ) : (
