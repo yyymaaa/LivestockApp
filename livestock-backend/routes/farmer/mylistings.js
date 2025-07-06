@@ -1,110 +1,104 @@
-//livestock-backend/routes.farmer/mylistings.js
 const express = require('express');
 const router = express.Router();
 const db = require('../../config/db');
-const { authenticateToken } = require('../../middleware/authMiddleware'); // ✅ Import
 
-router.use(authenticateToken);
-
-// ✅ GET all listings for a specific user
-router.get('/:user_id', async (req, res) => {
-  const userId = req.params.user_id;
+// GET all listings for a specific farmer
+router.get('/:farmerId', async (req, res) => {
+  const farmerId = req.params.farmerId;
+  console.log(`Fetching listings for farmer ID: ${farmerId}`);
 
   try {
-    const [results] = await db.query(`
-      SELECT pl.*, lm.url AS image_url
-      FROM product_listing pl
-      LEFT JOIN Listing_media lm ON pl.listing_id = lm.product_listing_id
-      WHERE pl.user_id = ?
-    `, [userId]);
-
+    const [results] = await db.query(
+      'SELECT * FROM product_listing WHERE user_id = ?', [farmerId]
+    );
+    console.log(`Fetched ${results.length} listings`);
     res.json(results);
   } catch (err) {
-    console.error('Error fetching listings:', err);
-    res.status(500).json({ error: 'Database error' });
+    console.error('Error fetching listings:', err.message);
+    res.status(500).json({ error: 'Database error', details: err.message });
   }
 });
 
-// ✅ GET single listing by ID
-router.get('/single/:listingId', authenticateToken, async (req, res) => {
-  const listingId = req.params.listingId;
-
-  try {
-    const [results] = await db.query(`
-      SELECT pl.*, GROUP_CONCAT(lm.url) AS images
-      FROM product_listing pl
-      LEFT JOIN Listing_media lm ON pl.listing_id = lm.product_listing_id
-      WHERE pl.listing_id = ?
-      GROUP BY pl.listing_id
-    `, [listingId]);
-
-    if (results.length === 0) {
-      return res.status(404).json({ error: 'Listing not found' });
-    }
-
-    const listing = results[0];
-    listing.images = listing.images ? listing.images.split(',') : [];
-    res.json(listing);
-  } catch (err) {
-    console.error('Error fetching single listing:', err);
-    res.status(500).json({ error: 'Database error' });
-  }
-});
-
-//  POST new listing
+// POST new listing
+// POST new product listing
 router.post('/', async (req, res) => {
-  const { title, image, description, price_per_unit, quantity_available, status, user_id } = req.body;
+  let { title, image, description, price, quantity, status, user_id } = req.body;
 
-  if (!user_id || !title || !description || !price_per_unit || !quantity_available || !status) {
+  console.log('Received body:', req.body);
+
+  user_id = parseInt(user_id);
+
+  if (!user_id || !title || !description || !price || !quantity || !status || !image) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
   try {
-    const [result] = await db.query(`
-      INSERT INTO product_listing (title, image, description, price_per_unit, quantity_available, status, user_id, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
-    `, [title, image, description, price_per_unit, quantity_available, status, user_id]);
+    const created_at = new Date();
 
-    res.status(201).json({ message: 'Listing created successfully', listing_id: result.insertId });
+    // Insert into product_listing
+    const [listingResult] = await db.query(`
+      INSERT INTO product_listing
+      (title, description, price_per_unit, quantity_available, status, user_id, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `, [title, description, price, quantity, status.toLowerCase(), user_id, created_at]);
+
+    const listingId = listingResult.insertId;
+    console.log(`Inserted product_listing ID: ${listingId}`);
+
+    // Insert into listing_media (with service_listing_id set to NULL)
+    await db.query(`
+      INSERT INTO listing_media
+      (product_listing_id, service_listing_id, url, created_at)
+      VALUES (?, NULL, ?, ?)
+    `, [listingId, image, created_at]);
+
+    res.status(201).json({ message: 'Listing and image saved successfully', id: listingId });
   } catch (err) {
-    console.error('Error posting listing:', err);
-    res.status(500).json({ error: 'Database error' });
+    console.error('MySQL Error:', err);
+    res.status(500).json({ error: 'Database error', details: err.message });
   }
 });
 
-// PUT update listing by ID
+
+// PUT update listing
 router.put('/:listingId', async (req, res) => {
   const listingId = req.params.listingId;
-  const { title, image, description, price_per_unit, quantity_available, status } = req.body;
+  const { title, image, description, price, quantity, status } = req.body;
 
-  if (!title || !description || !price_per_unit || !quantity_available || !status) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
+  console.log(`Received PUT request to update listing ID ${listingId}`);
+  console.log('Update data:', req.body);
 
   try {
-    await db.query(`
-      UPDATE product_listing
-      SET title = ?, image = ?, description = ?, price_per_unit = ?, quantity_available = ?, status = ?
-      WHERE listing_id = ?
-    `, [title, image, description, price_per_unit, quantity_available, status, listingId]);
+    const [result] = await db.query(
+      `UPDATE product_listing
+       SET title = ?, image = ?, description = ?, price_per_unit = ?, quantity_available = ?, status = ?
+       WHERE listing_id = ?`,
+      [title, image, description, price, quantity, status, listingId]
+    );
 
+    console.log(`Update successful. Rows affected: ${result.affectedRows}`);
     res.json({ message: 'Listing updated successfully' });
   } catch (err) {
-    console.error('Error updating listing:', err);
-    res.status(500).json({ error: 'Database error' });
+    console.error('Database error during UPDATE:', err.message);
+    res.status(500).json({ error: 'Database error', details: err.message });
   }
 });
 
-// DELETE listing by ID
+// DELETE listing
 router.delete('/:listingId', async (req, res) => {
   const listingId = req.params.listingId;
+  console.log(`Received DELETE request for listing ID: ${listingId}`);
 
   try {
-    await db.query('DELETE FROM product_listing WHERE listing_id = ?', [listingId]);
+    const [result] = await db.query(
+      'DELETE FROM product_listing WHERE listing_id = ?', [listingId]
+    );
+
+    console.log(`Delete successful. Rows affected: ${result.affectedRows}`);
     res.json({ message: 'Listing deleted successfully' });
   } catch (err) {
-    console.error('Error deleting listing:', err);
-    res.status(500).json({ error: 'Database error' });
+    console.error('Database error during DELETE:', err.message);
+    res.status(500).json({ error: 'Database error', details: err.message });
   }
 });
 

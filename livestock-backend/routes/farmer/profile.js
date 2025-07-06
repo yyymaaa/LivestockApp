@@ -3,7 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../../config/db');
-const { authenticateToken } = require('../../middleware/authMiddleware'); // ✅ import
+const { authenticateToken } = require('../../middleware/authMiddleware'); 
 
 
 router.use(authenticateToken);
@@ -21,7 +21,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
   try {
     const [rows] = await db.query(
-      `SELECT user_id, username, email, contact_info FROM user WHERE user_id = ?`,
+      `SELECT user_id, name, email, contact_info FROM user WHERE user_id = ?`,
       [userId]
     );
 
@@ -57,14 +57,14 @@ router.put('/:id', async (req, res) => {
 
   try {
     const [updateResult] = await db.query(
-      'UPDATE user SET username = ?, email = ?, contact_info = ? WHERE user_id = ?',
+      'UPDATE user SET name = ?, email = ?, contact_info = ? WHERE user_id = ?',
       [username, email, contact_info, user_id]
     );
 
     console.log('Update result:', updateResult);
 
     const [rows] = await db.query(
-      'SELECT user_id, username, email, contact_info FROM user WHERE user_id = ?',
+      'SELECT user_id, name, email, contact_info FROM user WHERE user_id = ?',
       [user_id]
     );
 

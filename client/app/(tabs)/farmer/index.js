@@ -1,3 +1,4 @@
+//client/app/(tabs)/farmer/index.js
 import React, { useEffect, useState } from 'react';
 import { View, ScrollView, Text, StyleSheet } from 'react-native';
 import FarmerListingCard from '../../../components/FarmerListingCard';

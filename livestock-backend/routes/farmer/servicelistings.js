@@ -1,5 +1,3 @@
-//livestock-backend/routes/farmer/servicelistings.js
-
 const express = require('express');
 const router = express.Router();
 const db = require('../../config/db');
@@ -53,7 +51,7 @@ router.get('/', async (req, res) => {
       s.available_slots,
       s.status,
       s.created_at,
-      u.username,
+      u.name,
       m.url
     FROM service_listing s
     JOIN user u ON s.user_id = u.user_id

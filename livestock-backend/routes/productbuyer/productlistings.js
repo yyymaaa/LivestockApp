@@ -1,3 +1,4 @@
+//livestock-backend/routes/productbuyer/productlistings.js
 const express = require('express');
 const router = express.Router();
 const db = require('../../config/db');
@@ -56,8 +57,8 @@ router.get('/', async (req, res) => {
       p.quantity_available,
       p.status,
       p.created_at,
-      u.username,
-      u.contact_info,
+      u.name,
+      u.contact,
       m.url
     FROM product_listing p
     JOIN user u ON p.user_id = u.user_id

@@ -27,6 +27,7 @@ export default function ProductBuyerLayout() {
       <Tabs.Screen name="index" options={{ title: 'Home' }} />
       <Tabs.Screen name="search" options={{ title: 'Search' }} />
       <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
+      <Tabs.Screen name="ViewFarmerProfile" options={{ href: null }} />
     </Tabs>
   );
 }

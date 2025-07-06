@@ -1,3 +1,4 @@
+//client/app/(tabs)/farmer/_layout.js
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -24,6 +25,7 @@ export default function FarmerLayout() {
       <Tabs.Screen name="search" options={{ title: 'Search' }} />
       <Tabs.Screen name="mylistings" options={{ title: 'My Listings' }} />
       <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
+      <Tabs.Screen name="ViewServiceProfile" options={{ href: null }} />
     </Tabs>
   );
 }

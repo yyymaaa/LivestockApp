@@ -11,36 +11,60 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MyListings = () => {
   const router = useRouter();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const farmerId = 3; // Temporary test farmer_id
+  const [farmerId, setFarmerId] = useState(null);
 
   useEffect(() => {
-    const fetchListings = async () => {
+    const loadUserAndFetchListings = async () => {
       try {
-        const res = await fetch(`http://192.168.0.100:5000/api/farmer/mylistings/${farmerId}`);
-        const data = await res.json();
-        setListings(data);
+        const userData = await AsyncStorage.getItem('user');
+        const user = JSON.parse(userData);
+
+        if (user && user.user_id) {
+          setFarmerId(user.user_id);
+
+          const res = await fetch(`http://192.168.0.100:5000/api/farmer/mylistings/${user.user_id}`);
+          const data = await res.json();
+          setListings(data);
+        } else {
+          console.warn('User data missing or invalid.');
+        }
       } catch (error) {
-        console.error('Failed to fetch listings:', error);
+        console.error('Failed to load user or fetch listings:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchListings();
+    loadUserAndFetchListings();
   }, []);
 
-  const handleAdd = () => {
-    router.push('/farmer/listingform');
+  const handleAdd = async () => {
+    try {
+      const userData = await AsyncStorage.getItem('user');
+      const user = JSON.parse(userData);
+      router.push({
+        pathname: '/farmer/listingform',
+        params: {
+          mode: 'create',
+          farmer_id: user.user_id, // ✅ This will no longer be undefined
+        },
+      });
+    } catch (error) {
+      console.error('Failed to navigate to listing form:', error);
+    }
   };
 
   const handlePressCard = (listing) => {
-    router.push({ pathname: '/farmer/listingdetails', params: { id: listing.listing_id || listing.offering_id } });
+    router.push({
+      pathname: '/farmer/listingdetails',
+      params: { id: listing.listing_id || listing.offering_id },
+    });
   };
 
   const handleGoBack = () => {

@@ -1,9 +1,21 @@
+// client/components/FarmerListingCard.js
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export default function FarmerListingCard({ listing }) {
+  const router = useRouter();
+
+  const handlePress = () => {
+    if (listing.service_provider_id) {
+      router.push(`/farmer/ViewServiceProviderProfile?id=${listing.service_provider_id}`);
+    } else if (listing.farmer_id) {
+      router.push(`/productbuyer/ViewFarmerProfile?id=${listing.farmer_id}`);
+    }
+  };
+
   return (
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={handlePress}>
       {/* Provider Name */}
       <Text style={styles.name}>{listing.provider_name}</Text>
 
@@ -25,7 +37,7 @@ export default function FarmerListingCard({ listing }) {
         <Text style={styles.slots}>Available: {listing.available_slots}</Text>
         <Text style={styles.date}>Posted: {new Date(listing.created_at).toLocaleDateString()}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
