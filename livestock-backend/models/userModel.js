@@ -1,68 +1,102 @@
 const db = require('../config/db');
 
-// Insert a new user into the database
 exports.insertUser = async (userData) => {
-  const {
-    name,
+  const { email, username, password, role, latitude, longitude, contact_info } = userData;
+
+  const sql = `
+    INSERT INTO user (email, username, password, role, latitude, longitude, contact_info, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+  `;
+
+  const values = [
     email,
-    username,
+    username || null, 
     password,
     role,
-    latitude,
-    longitude,
-    contact_info
-  } = userData;
+    latitude || null,
+    longitude || null,
+    contact_info || null
+  ];
 
-  const [result] = await db.execute(
-    `INSERT INTO users (name, email, username, password, role, latitude, longitude, contact_info, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-    [name, email, username, password, role, latitude, longitude, contact_info]
-  );
-
-  return result;
+  try {
+    const [result] = await db.execute(sql, values);
+    return result;
+  } catch (err) {
+    console.error('Error inserting user:', err);
+    throw new Error('Database error during user registration');
+  }
 };
 
-// Find user by email (used in login)
 exports.findUserByEmail = async (email) => {
-  const [rows] = await db.execute(
-    'SELECT * FROM users WHERE email = ?',
-    [email]
-  );
-  return rows[0]; // return user object or undefined
+  try {
+    const [rows] = await db.execute(
+      'SELECT * FROM user WHERE email = ?',
+      [email]
+    );
+    return rows[0] || null;
+  } catch (err) {
+    console.error('Error finding user by email:', err);
+    throw new Error('Database query failed');
+  }
 };
 
-// Find user by username (used to check username availability)
 exports.findUserByUsername = async (username) => {
-  const [rows] = await db.execute(
-    'SELECT * FROM users WHERE username = ?',
-    [username]
-  );
-  return rows[0];
+  try {
+    const [rows] = await db.execute(
+      'SELECT * FROM user WHERE username = ?',
+      [username]
+    );
+    return rows[0] || null ;
+  } catch (err) {
+    console.error('Error finding user by username:', err);
+    throw new Error('Database query failed');
+  }
 };
 
-// Update username after registration
 exports.updateUsername = async (userId, username) => {
-  const [result] = await db.execute(
-    'UPDATE users SET username = ? WHERE user_id = ?',
-    [username, userId]
-  );
-  return result.affectedRows > 0;
+  try {
+    const [rows] = await db.execute(
+      'SELECT user_id FROM user WHERE user_id = ?', 
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      throw new Error('User not found'); 
+    }
+
+    const [result] = await db.execute(
+      'UPDATE user SET username = ? WHERE user_id = ?',
+      [username, userId]
+    );
+    return result.affectedRows > 0; 
+  } catch (err) {
+    console.error('Error updating username:', err);
+    throw new Error('Database error during username update');
+  }
 };
 
-// Get user by ID (after decoding JWT token)
 exports.findUserById = async (userId) => {
-  const [rows] = await db.execute(
-    'SELECT * FROM users WHERE user_id = ?',
-    [userId]
-  );
-  return rows[0];
+  try{
+    const [rows] = await db.execute(
+      'SELECT * FROM user WHERE user_id = ?',
+      [userId]
+    );
+    return rows[0] || null;
+  } catch (err) {
+    console.error('Error finding user by ID:', err);
+    throw new Error('Database query failed');
+  }
 };
 
-// Update user location
 exports.updateUserLocation = async (userId, latitude, longitude) => {
-  const [result] = await db.execute(
-    'UPDATE users SET latitude = ?, longitude = ? WHERE user_id = ?',
-    [latitude, longitude, userId]
-  );
-  return result.affectedRows > 0;
+  try {
+    const [result] = await db.execute(
+      'UPDATE user SET latitude = ?, longitude = ? WHERE user_id = ?',
+      [latitude, longitude, userId]
+    );
+    return result.affectedRows > 0;
+  } catch (err) {
+    console.error('Error updating location:', err);
+    throw new Error('Database error during location update');
+  }
 };

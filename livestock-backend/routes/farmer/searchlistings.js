@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
     s.price,
     s.status,
     s.created_at,
-    u.name AS provider_name,
+    u.username AS provider_name,
     lm.url AS image_url
   FROM service_listing s
   JOIN user u ON s.user_id = u.user_id
@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
   WHERE (
     LOWER(s.title) LIKE ? OR 
     LOWER(s.description) LIKE ? OR 
-    LOWER(u.name) LIKE ?
+    LOWER(u.username) LIKE ?
   ) AND s.status = 'available'
   ORDER BY s.created_at DESC
 `;

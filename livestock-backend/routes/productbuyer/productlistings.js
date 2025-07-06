@@ -56,8 +56,8 @@ router.get('/', async (req, res) => {
       p.quantity_available,
       p.status,
       p.created_at,
-      u.name,
-      u.contact,
+      u.username,
+      u.contact_info,
       m.url
     FROM product_listing p
     JOIN user u ON p.user_id = u.user_id

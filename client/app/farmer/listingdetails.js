@@ -1,4 +1,3 @@
-//client/app/farmer/listingdetails.js
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -63,7 +62,7 @@ const ListingDetails = () => {
         style: 'destructive',
         onPress: async () => {
           try {
-            await fetch(`http://192.168.0.100:5000/api/farmer/mylistings/${listing.offering_id || listing.listing_id}`, {
+            await fetch(`192.168.100.163:5000/api/farmer/mylistings/${listing.offering_id || listing.listing_id}`, {
               method: 'DELETE',
             });
             router.back();

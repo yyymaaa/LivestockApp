@@ -1,4 +1,3 @@
-// LIVESTOCKAPP/app/login/register/UserNameScreen.js
 import React, { useState, useEffect, useContext } from 'react';
 import {
   SafeAreaView,
@@ -10,14 +9,15 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// ✅ Adjust the import path if needed
 import { AuthenticationContext } from '../../contexts/authenticationContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router'; 
 
-const UsernameScreen = ({ navigation }) => {
+const UsernameScreen = () => {
+  const router = useRouter(); 
   const [username, setUsername] = useState('');
   const [isChecking, setIsChecking] = useState(false);
-  const [isAvailable, setIsAvailable] = useState(null); // null | true | false
+  const [isAvailable, setIsAvailable] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -65,7 +65,7 @@ const UsernameScreen = ({ navigation }) => {
 
       const success = await saveUsernameToBackend(username);
       if (success) {
-        navigation.navigate('LocationPermission');
+        router.push('../register/LocationPermissionScreen'); 
       } else {
         alert('Could not save username.');
       }

@@ -18,12 +18,12 @@ router.post('/save-location', authenticateToken, saveLocation);
 
 router.get('/', async (req, res) => {
     try {
-        const [users] = await db.query('SELECT * FROM users');
-        console.log(users);
-        if (!users || users.length === 0) {
-            return res.status(404).json({ message: 'No users found' });
+        const [user] = await db.query('SELECT * FROM user');
+        console.log(user);
+        if (!user || user.length === 0) {
+            return res.status(404).json({ message: 'No user found' });
         }
-        res.json(users); 
+        res.json(user); 
     } 
         catch (error) {
         console.error('Database error:', error);

@@ -2,6 +2,9 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../../config/db');
+const { authenticateToken } = require('../../middleware/authMiddleware'); // ✅ Import
+
+router.use(authenticateToken);
 
 // ✅ GET all listings for a specific user
 router.get('/:user_id', async (req, res) => {
@@ -23,7 +26,7 @@ router.get('/:user_id', async (req, res) => {
 });
 
 // ✅ GET single listing by ID
-router.get('/single/:listingId', async (req, res) => {
+router.get('/single/:listingId', authenticateToken, async (req, res) => {
   const listingId = req.params.listingId;
 
   try {

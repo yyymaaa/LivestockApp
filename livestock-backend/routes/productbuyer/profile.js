@@ -15,7 +15,7 @@ router.get('/:id', async (req, res) => {
 
   try {
     const [rows] = await db.query(
-      `SELECT user_id, name, email, contact AS contact FROM user WHERE user_id = ?`,
+      `SELECT user_id, username, email, contact_info AS contact FROM user WHERE user_id = ?`,
       [userId]
     );
 
@@ -37,26 +37,26 @@ router.get('/:id', async (req, res) => {
 // PUT /api/productbuyer/profile/:id - update user profile
 router.put('/:id', async (req, res) => {
   const userId = req.params.id;
-  const { name, email, contact } = req.body;
+  const { username, email, contact_info } = req.body;
 
   console.log(`📝 Updating profile for user_id: ${userId}`);
-  console.log('📨 Received update data:', { name, email, contact });
+  console.log('📨 Received update data:', { username, email, contact_info });
 
-  if (!name || !email) {
-    console.warn('⚠️ Missing required fields (name or email)');
-    return res.status(400).json({ error: 'Name and email are required' });
+  if (!username || !email) {
+    console.warn('⚠️ Missing required fields (username or email)');
+    return res.status(400).json({ error: 'Username and email are required' });
   }
 
   try {
     const [updateResult] = await db.query(
-      `UPDATE user SET name = ?, email = ?, contact = ? WHERE user_id = ?`,
-      [name, email, contact, userId]
+      `UPDATE user SET username = ?, email = ?, contact_info = ? WHERE user_id = ?`,
+      [username, email, contact_info, userId]
     );
 
     console.log('✅ Update result from DB:', updateResult);
 
     const [rows] = await db.query(
-      `SELECT user_id, name, email, contact AS contact FROM user WHERE user_id = ?`,
+      `SELECT user_id, username, email, contact_info AS contact_info FROM user WHERE user_id = ?`,
       [userId]
     );
 

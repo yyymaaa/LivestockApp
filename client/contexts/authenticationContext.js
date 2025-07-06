@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setIsLoading(true);
       const token = await AsyncStorage.getItem('userToken');
-      console.log('Token found in storage:', token ? 'YES' :'NO');
+      console.log('Token found in storage:', token ? 'YES' : 'NO');
 
       if (token) {
         const success = await fetchUserProfile(token);
@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUserProfile = async (token) => {
     try {
-      const res = await Api.get('/users/user-details', {
+      const res = await Api.get('/user/user-details', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -99,7 +99,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkUsernameAvailability = async (username) => {
     try {
-      const res = await Api.get(`/users/check-username/${username}`);
+      const res = await Api.get(`/user/check-username/${username}`);
       return res.data.available;
     } catch (error) {
       console.log('Username availability error:', error.response?.data || error.message);
@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }) => {
   const saveUsernameToBackend = async (username) => {
     try {
       const res = await Api.post(
-        `/users/save-username`,
+        `/user/save-username`,
         { username },
         {
           headers: {
@@ -128,7 +128,7 @@ export const AuthProvider = ({ children }) => {
   const saveLocationToBackend = async (latitude, longitude) => {
     try {
       const res = await Api.post(
-        `/users/save-location`,
+        `/user/save-location`,
         { latitude, longitude },
         {
           headers: {

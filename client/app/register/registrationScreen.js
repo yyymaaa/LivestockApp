@@ -1,70 +1,108 @@
-// LIVESTOCKAPP/app)/login/register/registrationScreen.js
 import React, { useState, useContext, useEffect } from 'react';
 import {
   SafeAreaView,
   View,
   Text,
-  TouchableOpacity,
   ScrollView,
+  TouchableOpacity,
   StyleSheet,
+  Alert,
 } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
 
-// Corrected import paths
 import InputField from '../../components/InputField';
 import AuthPasswordTextField from '../../components/AuthPasswordTextField';
 import AuthenticationButton from '../../components/AuthenticationButton';
 import { AuthenticationContext } from '../../contexts/authenticationContext';
 
-
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const RegistrationScreen = () => {
-  const navigation = useNavigation();
-  const route = useRoute();
+  const router = useRouter();
+  const { role = 'guest' } = useLocalSearchParams(); 
   const { register, isLoading } = useContext(AuthenticationContext);
-  const selectedRole = route.params?.role || 'farmer';
 
   const [form, setForm] = useState({
     email: '',
     password: '',
     confirmPassword: '',
-    role: selectedRole,
+    role,
   });
 
-  useEffect(() => {
-    setForm(prev => ({ ...prev, role: selectedRole }));
-  }, [selectedRole]);
-
-  const handleChange = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const handleChange = (key, value) => {
+    setForm(prev => ({ ...prev, [key]: value }));
+  };
 
   const passwordChecks = {
     minLength: form.password.length >= 8,
     hasUppercase: /[A-Z]/.test(form.password),
     hasLowercase: /[a-z]/.test(form.password),
-    hasNumber: /[0-9]/.test(form.password), // ✅ renamed from hasDigit
+    hasDigit: /[0-9]/.test(form.password),
     hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(form.password),
     noSpaces: !/\s/.test(form.password),
   };
 
   const isPasswordStrong = Object.values(passwordChecks).every(Boolean);
+  const validDomains = ['gmail.com', 'outlook.com', 'yahoo.com'];
+  const emailParts = form.email.split('@');
+  const emailDomain = emailParts.length === 2 ? emailParts[1].toLowerCase() : '';
+
+  const isValidEmail =
+  /\S+@\S+\.\S+/.test(form.email) && validDomains.includes(emailDomain);
+
 
   const handleRegister = async () => {
+    if (!form.email && !form.password && !form.confirmPassword) {
+    Alert.alert('Missing Fields', 'Please fill in all the fields.');
+    return;
+    }
+
+    if (!form.email) {
+      Alert.alert('Missing Email', 'Please enter your email.');
+      return;
+    }
+    if (!form.password) {
+      Alert.alert('Missing Password', 'Please enter your password.');
+      return;
+    }
+    if (!form.confirmPassword) {
+      Alert.alert('Missing Confirmation', 'Please confirm your password.');
+      return;
+    }
+
+
+    if (!isValidEmail) {
+    Alert.alert(
+    'Invalid Email',
+    'Please use a valid email from: gmail.com, outlook.com, or yahoo.com.'
+    );
+    return;
+    }
+
+
     if (form.password !== form.confirmPassword) {
-      alert('Passwords do not match');
+      Alert.alert('Password Mismatch', 'Passwords do not match.');
       return;
     }
 
     if (!isPasswordStrong) {
-      alert(
-        'Password must be at least 8 characters long and include:\n- uppercase letter\n- lowercase letter\n- number\n- special character\n- no spaces'
+      Alert.alert(
+        'Weak Password',
+        'Password must be at least 8 characters long and include:\n- Uppercase letter\n- Lowercase letter\n- Number\n- Special character\n- No spaces'
       );
       return;
     }
 
-    const success = await register(null, form.email, form.password, form.role);
-    if (success) {
-      navigation.replace('UserName');
+    try {
+      const success = await register(form.email, form.password, form.role);
+      if (success) {
+        router.push('../register/UserNameScreen'); 
+      } else {
+        Alert.alert('Registration Failed', 'Please try again.');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      Alert.alert('Error', 'An unexpected error occurred.');
     }
   };
 
@@ -86,11 +124,11 @@ const RegistrationScreen = () => {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Create an Account</Text>
-        <Text style={styles.subtitle}>Register to continue</Text>
+        <Text style={styles.subtitle}>Register as a {form.role}</Text>
 
         <InputField
           label="Email"
-          placeholder="Enter your email address"
+          placeholder="Enter your email"
           value={form.email}
           onChangeText={text => handleChange('email', text)}
           keyboardType="email-address"
@@ -113,10 +151,10 @@ const RegistrationScreen = () => {
         <View style={{ marginBottom: 16 }}>
           <Text style={styles.requirementsTitle}>Password must contain:</Text>
           <RequirementRow valid={passwordChecks.minLength} text="At least 8 characters" />
-          <RequirementRow valid={passwordChecks.hasUppercase} text="At least one uppercase letter" />
-          <RequirementRow valid={passwordChecks.hasLowercase} text="At least one lowercase letter" />
-          <RequirementRow valid={passwordChecks.hasNumber} text="At least one number" />
-          <RequirementRow valid={passwordChecks.hasSpecialChar} text="At least one special character" />
+          <RequirementRow valid={passwordChecks.hasUppercase} text="Uppercase letter" />
+          <RequirementRow valid={passwordChecks.hasLowercase} text="Lowercase letter" />
+          <RequirementRow valid={passwordChecks.hasDigit} text="A number" />
+          <RequirementRow valid={passwordChecks.hasSpecialChar} text="Special character" />
           <RequirementRow valid={passwordChecks.noSpaces} text="No spaces" />
         </View>
 
@@ -128,7 +166,7 @@ const RegistrationScreen = () => {
 
         <View style={styles.loginLinkContainer}>
           <Text style={styles.loginText}>Already have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+          <TouchableOpacity onPress={() => router.replace('/login')}>
             <Text style={styles.loginLink}>Log In</Text>
           </TouchableOpacity>
         </View>
@@ -145,8 +183,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: '600',
-    marginBottom: 20,
+    fontWeight: '700',
     textAlign: 'center',
     color: '#29AB87',
   },
@@ -154,7 +191,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     color: '#555',
-    marginBottom: 20,
+    marginBottom: 24,
+    marginTop: 4,
   },
   requirementsTitle: {
     fontSize: 14,

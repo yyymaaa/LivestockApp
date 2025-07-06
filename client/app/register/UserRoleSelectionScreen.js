@@ -1,4 +1,3 @@
-// LIVESTOCKAPP/app/login/register/ UserRoleSelectionScreen.js
 import React from 'react';
 import {
   SafeAreaView,
@@ -8,35 +7,50 @@ import {
   ScrollView,
   StyleSheet
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
+
+import AuthenticationButton from '../../components/AuthenticationButton';
+
 
 const UserRoleSelectionScreen = () => {
-  const navigation = useNavigation();
+  const router = useRouter();
+
   const options = [
     {
       title: 'Selling Service',
       subtitle: "I'd like to grow, advertise, and offer my services.",
-      action: () => navigation.navigate('Registration', { role: 'serviceProvider' }),
+      action: () =>
+        router.push({
+          pathname: '/register/RegistrationScreen',
+          params: { role: 'Livestock Service Provider' },
+        }),
     },
     {
       title: 'Find a Service and Selling products',
-      subtitle: "I'm looking for a service provider and I want to sell my livestock products.",
-      action: () => navigation.navigate('Registration', { role: 'farmer' }),
+      subtitle:
+        "I'm looking for a service provider and I want to sell my livestock products.",
+      action: () =>
+        router.push({
+          pathname: '/register/RegistrationScreen',
+          params: { role: 'Farmer' },
+        }),
     },
     {
       title: 'Find livestock products',
       subtitle: "I'm looking for a farmer to supply livestock products.",
-      action: () => navigation.navigate('Registration', { role: 'buyer' }),
+      action: () =>
+        router.push({
+          pathname: '/register/RegistrationScreen',
+          params: { role: 'Livestock Product Buyer' },
+        }),
     },
   ];
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Prompt Text */}
         <Text style={styles.promptText}>What best describes you?</Text>
 
-        {/* Option Cards */}
         <View style={styles.cardsContainer}>
           {options.map((opt, idx) => (
             <TouchableOpacity
@@ -51,20 +65,13 @@ const UserRoleSelectionScreen = () => {
           ))}
         </View>
 
-        {/* Bottom Actions */}
         <View style={styles.bottomContainer}>
-          <TouchableOpacity
-            onPress={() => navigation.replace('Home')}
-          >
-            <Text style={styles.skipText}>Skip</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Login')}
-            style={styles.signInButton}
-          >
-            <Text style={styles.signInButtonText}>Sign in</Text>
-          </TouchableOpacity>
-        </View>
+        <AuthenticationButton
+          label="Sign Up"
+          onPress={() => router.push('../register/RegistrationScreen')}
+        />
+      </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -83,11 +90,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   promptText: {
-    marginTop: 32,
-    fontSize: 18,
-    fontWeight: '500',
+    fontSize: 24,
+    fontWeight: '700',
     textAlign: 'center',
-    color: '#333',
+    color: '#29AB87',
+    marginTop: 75,
   },
   cardsContainer: {
     marginTop: 24,
@@ -114,24 +121,7 @@ const styles = StyleSheet.create({
     color: '#555',
   },
   bottomContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  skipText: {
-    fontSize: 16,
-    color: '#888',
-  },
-  signInButton: {
-    backgroundColor: '#29AB87',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 24,
-  },
-  signInButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+  marginBottom: 75, 
   },
 });
 

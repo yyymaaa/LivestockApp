@@ -64,9 +64,16 @@ app.use('/api/productbuyer/products', productBuyerProducts);
 app.use('/api/productbuyer/search', productBuyerSearch);
 app.use('/api/productbuyer/profile', productBuyerProfile);
 
+//Admin Routes 
+app.use('/api/admin/auth', require('./routes/admin/auth'));
+app.use('/api/admin/manage-users', require('./routes/admin/manage-users'));
+app.use ('/api/admin/logs',require('./routes/admin/logs'))
+app.use('/api/admin/reports', require('./routes/admin/reports')); 
+app.use('/api/admin/dashboardStats', require('./routes/admin/dashboardStats')); 
+
 // Other Routes
 app.use('/api/auth', require('./routes/authenticationRoutes'));
-app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/user', require('./routes/userRoutes'));
 app.use('/api/upload', uploadRoute);
 
 // Health check
@@ -87,7 +94,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-console.log('✅ Server setup complete. Ready to accept requests.');
+console.log('Server setup complete. Ready to accept requests.');
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

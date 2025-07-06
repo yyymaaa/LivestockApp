@@ -23,8 +23,8 @@ router.get('/', async (req, res) => {
       p.quantity_available,
       p.status,
       p.created_at,
-      u.name AS farmer_name,
-      u.contact,
+      u.username AS farmer_name,
+      u.contact_info,
       lm.url AS image_url
     FROM product_listing p
     JOIN user u ON p.user_id = u.user_id
@@ -32,7 +32,7 @@ router.get('/', async (req, res) => {
     WHERE (
       LOWER(p.title) LIKE ? OR 
       LOWER(p.description) LIKE ? OR 
-      LOWER(u.name) LIKE ?
+      LOWER(u.username) LIKE ?
     ) AND p.status = 'available'
     ORDER BY p.created_at DESC
   `;

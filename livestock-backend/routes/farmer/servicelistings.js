@@ -53,7 +53,7 @@ router.get('/', async (req, res) => {
       s.available_slots,
       s.status,
       s.created_at,
-      u.name,
+      u.username,
       m.url
     FROM service_listing s
     JOIN user u ON s.user_id = u.user_id

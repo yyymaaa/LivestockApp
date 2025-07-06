@@ -13,22 +13,31 @@ import AuthenticationButton from '../../components/AuthenticationButton';
 import AuthPasswordTextField from '../../components/AuthPasswordTextField';
 import InputField from '../../components/InputField';
 
-import { useRouter } from 'expo-router'; //for navigation
-import AsyncStorage from '@react-native-async-storage/async-storage'; //to store user (this is optional
+import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { BASE_URL } from '../../config';
+import { AuthenticationContext } from '../../contexts/authenticationContext';
 
 const LoginScreen = () => {
-  const [phoneOrEmail, setPhoneOrEmail] = useState('');
+  const [Email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter(); 
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
- 
   const handleLogin = async () => {
+    if (!Email || !password) {
+    return Alert.alert('Missing Fields', 'Please enter both email and password.');
+    }
+
+    setIsLoading(true);
+
     try {
-      const response = await fetch('http://192.168.56.1:5000/api/auth/login', {
+      const response = await fetch(`${BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: phoneOrEmail,
+          email: Email,
           password: password
         }),
       });
@@ -41,84 +50,104 @@ const LoginScreen = () => {
 
       const user = data.user;
 
-      //Store user in local storag, this  too is optional
+      // AsyncStorage saves to a local storage
       await AsyncStorage.setItem('user', JSON.stringify(user));
 
-      //Redirecting based on role
-      if (user.role === 'Farmer' || user.group_id === 3) {
+      const role = user.role;
+      if (role === 'Farmer') {
         router.replace('/(tabs)/farmer');
+      } else if (role === 'ivestock Service Provider') {
+        router.replace('/(tabs)/serviceprovider');
+      } else if (role === 'Livestock Product Buyer' || role === 'productbuyer') {
+        router.replace('/(tabs)/productbuyer');
       } else {
-        router.replace('/(tabs)/serviceProvider'); 
+        Alert.alert('Unknown Role', 'Cannot determine where to redirect.');
       }
 
     } catch (error) {
       console.error('Login error:', error);
       Alert.alert('Error', 'Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false); 
     }
   };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={StyleSheet.container}>
-
-        <Text style={StyleSheet.title}>Welcome Back</Text>
-        <Text style={StyleSheet.subtitle}>Login to continue</Text>
+      <View style={styles.container}>
+        <Text style={styles.title}>Welcome Back</Text>
+        <Text style={styles.subtitle}>Login to continue</Text>
 
         <InputField
-          label="Phone or Email"
-          placeholder="Enter phone number or email"
-          value={phoneOrEmail}
-          onChangeText={setPhoneOrEmail}
+          label="Email"
+          placeholder="Enter your email address"
+          value={Email}
+          onChangeText={setEmail}
         />
 
         <AuthPasswordTextField
           label="Password"
+          placeholder="Enter your password"
           value={password}
           onChangeText={setPassword}
         />
 
-        <TouchableOpacity
-          onPress={() => { }}
-          style={StyleSheet.forgotPasswordContainer}
-        >
-          <Text style={StyleSheet.forgotPasswordText}>Forgot Password?</Text>
-        </TouchableOpacity>
-
-        {/*login function goes here */}
         <AuthenticationButton
           label="Log In"
-          onPress={handleLogin} // calling handleLogin
+          onPress={handleLogin}
         />
 
-        <View style={StyleSheet.orContainer}>
-          <View style={StyleSheet.line} />
-          <Text style={StyleSheet.orText}>OR</Text>
-          <View style={StyleSheet.line} />
-        </View>
-
-        <View style={StyleSheet.socialButtonsContainer}>
-
-          <TouchableOpacity style={StyleSheet.socialButton}>
-            <AntDesign name="google" size={20} color="#EA4335" />
-            <Text style={StyleSheet.socialButtonText}>Continue with Google</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={StyleSheet.socialButton}>
-            <AntDesign name="apple1" size={20} color="#000" />
-            <Text style={StyleSheet.socialButtonText}>Continue with Apple</Text>
+        <View style={styles.registerContainer}>
+          <Text style={styles.registerText}>New to the app? </Text>
+          <TouchableOpacity onPress={() => router.push('../register/RegistrationScreen')}>
+            <Text style={styles.registerLink}>Register</Text>
           </TouchableOpacity>
         </View>
-
-        <View style={StyleSheet.registerContainer}>
-          <Text style={StyleSheet.registerText}>New to the app? </Text>
-          <TouchableOpacity onPress={() => { }}>
-            <Text style={StyleSheet.registerLink}>Register</Text>
-          </TouchableOpacity>
-        </View>
-
       </View>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 24,
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    textAlign: 'center',
+    color: '#29AB87',
+  },
+  subtitle: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#555',
+    marginBottom: 24,
+    marginTop: 4,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  registerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 25,
+  },
+  registerText: {
+    color: '#555',
+    fontSize: 14,
+  },
+  registerLink: {
+    color: '#29AB87',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+});
 
 export default LoginScreen;
