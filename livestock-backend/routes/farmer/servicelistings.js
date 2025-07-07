@@ -2,6 +2,16 @@ const express = require('express');
 const router = express.Router();
 const db = require('../../config/db');
 
+// Enhanced error logging middleware
+const logError = (err) => {
+  console.error('\n--- DATABASE ERROR DETAILS ---');
+  console.error('Message:', err.message);
+  console.error('SQL:', err.sql);
+  console.error('Code:', err.code);
+  console.error('Stack:', err.stack);
+  console.error('---------------------------\n');
+};
+
 // Grouping logic
 function groupMedia(results) {
   const grouped = {};
@@ -15,6 +25,7 @@ function groupMedia(results) {
       status,
       created_at,
       name,
+      contact,
       url,
     } = row;
 
@@ -28,6 +39,7 @@ function groupMedia(results) {
         status,
         created_at,
         provider_name: name,
+        contact, 
         media: [],
       };
     }
@@ -52,6 +64,7 @@ router.get('/', async (req, res) => {
       s.status,
       s.created_at,
       u.name,
+      u.contact,  
       m.url
     FROM service_listing s
     JOIN user u ON s.user_id = u.user_id
@@ -60,13 +73,28 @@ router.get('/', async (req, res) => {
     ORDER BY s.created_at DESC
   `;
 
+  console.log('Executing query:', query); // Log the exact query being run
+
   try {
     const [results] = await db.query(query);
+    console.log('Raw query results:', results); // Log raw results
     const grouped = groupMedia(results);
     res.json(grouped);
   } catch (err) {
-    console.error('Database error:', err.message);
-    res.status(500).json({ error: 'Internal server error' });
+    logError(err); // Use our enhanced error logger
+    
+    // Send more detailed error info in development
+    const errorResponse = {
+      error: 'Database error',
+      message: err.message,
+      ...(process.env.NODE_ENV === 'development' && {
+        sql: err.sql,
+        code: err.code,
+        stack: err.stack
+      })
+    };
+    
+    res.status(500).json(errorResponse);
   }
 });
 

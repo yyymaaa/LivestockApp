@@ -1,8 +1,6 @@
-//client/app/(tabs)/farmer/profile.js
 import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-
 import {
   View,
   Text,
@@ -11,7 +9,8 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
-  Alert
+  Alert,
+  ActivityIndicator
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -19,23 +18,27 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedUser, setEditedUser] = useState({});
-  const farmerId = 3; // Temporary test farmer_id
-
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const handleGoBack = () => {
-    router.back();
-  };
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch(`http://192.168.0.100:5000/api/farmer/profile/${farmerId}`);
+        setLoading(true);
+        const response = await fetch(`http://192.168.0.100:5000/api/farmer/profile/3`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
-        console.log('Profile fetched:', data);
         setUser(data.user);
         setEditedUser(data.user);
       } catch (err) {
         console.error('Profile fetch failed:', err);
+        Alert.alert('Error', 'Failed to load profile');
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -44,32 +47,45 @@ export default function Profile() {
 
   const handleSave = async () => {
     try {
-      const res = await fetch(`http://192.168.0.100:5000/api/farmer/profile/${farmerId}`, {
+      setLoading(true);
+      const response = await fetch(`http://192.168.0.100:5000/api/farmer/profile/3`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editedUser),
+        body: JSON.stringify({
+          name: editedUser.name,
+          email: editedUser.email,
+          contact: editedUser.contact
+        }),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Update failed');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
+      const data = await response.json();
       Alert.alert('Success', 'Profile updated successfully');
       setUser(data.user);
-      await AsyncStorage.setItem('user', JSON.stringify(data.user));
       setIsEditing(false);
     } catch (err) {
-      Alert.alert('Error', err.message);
       console.error('Save error:', err);
+      Alert.alert('Error', 'Failed to update profile');
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="green" />
+      </View>
+    );
+  }
 
   if (!user) {
     return (
       <View style={styles.container}>
-        <Text style={styles.loading}>Loading profile...</Text>
+        <Text style={styles.error}>Failed to load profile</Text>
       </View>
     );
   }
@@ -77,7 +93,7 @@ export default function Profile() {
   return (
     <>
       <View style={styles.backButtonContainer}>
-        <TouchableOpacity onPress={handleGoBack}>
+        <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="green" />
         </TouchableOpacity>
       </View>
@@ -98,27 +114,38 @@ export default function Profile() {
               <TextInput
                 style={styles.input}
                 placeholder="Name"
-                value={editedUser.name}
+                value={editedUser.name || ''}
                 onChangeText={text => setEditedUser({ ...editedUser, name: text })}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Email"
-                value={editedUser.email}
+                value={editedUser.email || ''}
                 onChangeText={text => setEditedUser({ ...editedUser, email: text })}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Phone"
-                value={editedUser.contact}
+                value={editedUser.contact || ''}
                 onChangeText={text => setEditedUser({ ...editedUser, contact: text })}
               />
-              <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                <Text style={styles.buttonText}>Save</Text>
+              <TouchableOpacity 
+                style={styles.saveButton} 
+                onPress={handleSave}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text style={styles.buttonText}>Save</Text>
+                )}
               </TouchableOpacity>
             </>
           ) : (
-            <TouchableOpacity style={styles.editButton} onPress={() => setIsEditing(true)}>
+            <TouchableOpacity 
+              style={styles.editButton} 
+              onPress={() => setIsEditing(true)}
+            >
               <Text style={styles.buttonText}>Edit Profile</Text>
             </TouchableOpacity>
           )}
@@ -131,13 +158,13 @@ export default function Profile() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#fff' },
   loading: { textAlign: 'center', marginTop: 50 },
+  error: { textAlign: 'center', marginTop: 50, color: 'red' },
   header: { alignItems: 'center', marginBottom: 20 },
   avatar: { width: 100, height: 100, borderRadius: 50, marginBottom: 10 },
   name: { fontSize: 24, fontWeight: 'bold' },
   email: { fontSize: 16, color: '#666' },
   phone: { fontSize: 16, color: '#666' },
   bioContainer: { marginTop: 20 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
@@ -156,6 +183,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 6,
     alignItems: 'center',
+    opacity: 1,
   },
   buttonText: { color: '#fff', fontWeight: 'bold' },
   backButtonContainer: {
